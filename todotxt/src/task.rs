@@ -1,16 +1,15 @@
+use crate::{
+    parser::Parse,
+    priority::Priority,
+    tags::{Tag, Tags},
+};
+use chrono::NaiveDate;
+#[cfg(feature = "serde")]
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 use std::{
     borrow::Cow,
     fmt::{self, Debug, Display, Formatter},
 };
-
-use chrono::NaiveDate;
-use nom::{self, space, IResult};
-#[cfg(feature = "serde")]
-use serde::ser::{Serialize, SerializeStruct, Serializer};
-
-use parser::Parse;
-use priority::Priority;
-use tags::{Tag, Tags};
 
 /// The disjoint state of complete and incomplete tasks.
 ///
@@ -33,7 +32,7 @@ pub struct Task<'a> {
 }
 
 impl<'a> Debug for Task<'a> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let tags: Vec<Tag> = self.tags().collect();
 
         f.debug_struct("Task")
@@ -50,7 +49,7 @@ impl<'a> Debug for Task<'a> {
 impl<'a> Parse<'a> for NaiveDate {
     type Output = NaiveDate;
 
-    fn parse(input: &str) -> IResult<&str, Self::Output> {
+    fn parse(input: &str) -> nom::IResult<&str, Self::Output> {
         named!(ymd<&str, (i32, u32, u32)>,
             tuple!(
                 terminated!(flat_map!(take!(4), parse_to!(i32)), char!('-')),
@@ -68,23 +67,23 @@ impl<'a> Parse<'a> for NaiveDate {
 impl<'a> Parse<'a> for State {
     type Output = State;
 
-    fn parse(input: &str) -> IResult<&str, Self::Output> {
+    fn parse(input: &str) -> nom::IResult<&str, Self::Output> {
         named!(complete<&str, (NaiveDate, NaiveDate)>,
             terminated!(
-                separated_pair!(NaiveDate::parse, space, NaiveDate::parse),
-                space
+                separated_pair!(NaiveDate::parse, nom::space, NaiveDate::parse),
+                nom::space
             )
         );
 
         named!(unknown<&str, (Option<Priority>, Option<NaiveDate>, Option<NaiveDate>)>,
             tuple!(
-                opt!(terminated!(Priority::parse, space)),
-                opt!(terminated!(NaiveDate::parse, space)),
-                opt!(terminated!(NaiveDate::parse, space))
+                opt!(terminated!(Priority::parse, nom::space)),
+                opt!(terminated!(NaiveDate::parse, nom::space)),
+                opt!(terminated!(NaiveDate::parse, nom::space))
             )
         );
 
-        switch!(input, opt!(terminated!(char!('x'), space)),
+        switch!(input, opt!(terminated!(char!('x'), nom::space)),
             Some(_) => map!(opt!(complete), State::Complete) |
             None => map!(unknown, |result| match result {
                 (None, Some(completion_date), Some(creation_date)) => {
@@ -187,7 +186,7 @@ impl<'a> Task<'a> {
     /// }
     /// # }
     /// ```
-    pub fn tags(&self) -> Tags {
+    pub fn tags(&self) -> Tags<'_> {
         let data = self.description();
         let iter = data.char_indices();
 
@@ -205,7 +204,7 @@ impl<'a> Clone for Task<'a> {
 }
 
 impl<'a> Display for Task<'a> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if self.is_complete() {
             f.write_str("x ")?;
         }
@@ -229,10 +228,10 @@ impl<'a> Display for Task<'a> {
 impl<'a> Parse<'a> for Task<'a> {
     type Output = Task<'a>;
 
-    fn parse(input: &'a str) -> IResult<&str, Self::Output> {
+    fn parse(input: &'a str) -> nom::IResult<&str, Self::Output> {
         map!(
-            input,
-            pair!(ws!(State::parse), map!(nom::rest, Cow::Borrowed)),
+            input.trim(),
+            pair!(State::parse, map!(nom::rest, Cow::Borrowed)),
             |(state, text)| Task { state, text }
         )
     }

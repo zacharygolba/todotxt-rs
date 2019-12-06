@@ -1,3 +1,5 @@
+#[cfg(feature = "serde")]
+use serde::Serialize;
 use std::{iter::FusedIterator, ops::Index, str::CharIndices};
 
 /// The various tags that can appear within the description of a task.
@@ -172,7 +174,7 @@ fn is_whitespace((_, item): &(usize, char)) -> bool {
     item.is_whitespace()
 }
 
-fn next_word_boundary(iter: &mut CharIndices) -> Option<(usize, usize)> {
+fn next_word_boundary(iter: &mut CharIndices<'_>) -> Option<(usize, usize)> {
     let mut iter = iter.skip_while(is_whitespace).take_while(is_not_whitespace);
     let start = iter.next().map(|(index, _)| index)?;
     let end = iter.last().map_or(start, |(index, _)| index + 1);

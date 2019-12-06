@@ -1,20 +1,17 @@
 //! Contains data structures and traits used to parse a list of tasks.
 
-use std::{iter::FusedIterator, str::Lines};
-
-use nom::IResult;
+use crate::task::Task;
 #[cfg(feature = "rayon")]
 use rayon::{
     iter::{plumbing::UnindexedConsumer, ParallelIterator},
     str::{Lines as ParallelLines, ParallelString},
 };
-
-use task::Task;
+use std::{iter::FusedIterator, str::Lines};
 
 /// Provides methods for types that can be used as parser input.
 pub trait Input {
     /// Returns an iterator of tasks contained in `self`.
-    fn tasks(&self) -> Iter;
+    fn tasks(&self) -> Iter<'_>;
 }
 
 /// An iterator over the tasks of a given input.
@@ -38,7 +35,7 @@ pub struct ParallelIter<'a> {
 
 pub(crate) trait Parse<'a> {
     type Output;
-    fn parse(input: &'a str) -> IResult<&'a str, Self::Output>;
+    fn parse(input: &'a str) -> nom::IResult<&'a str, Self::Output>;
 }
 
 pub(crate) fn parse<'a, T>(input: &'a str) -> Option<T::Output>
@@ -52,7 +49,7 @@ where
 }
 
 impl Input for str {
-    fn tasks(&self) -> Iter {
+    fn tasks(&self) -> Iter<'_> {
         Iter {
             lines: self.lines(),
         }
