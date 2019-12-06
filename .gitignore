@@ -1,0 +1,16 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Artifacts
+build/
+coverage/
+target/
+pkg/
+
+# Dependencies
+node_modules/
+Cargo.lock
+
+# Miscellaneous
+**/*.DS_Store
+**/*.rs.bk
+.vscode/
