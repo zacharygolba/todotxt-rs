@@ -2,10 +2,11 @@
 name = "todotxt-to-json"
 version = "0.1.0"
 authors = ["Zachary Golba <zachary.golba@postlight.com>"]
+edition = "2018"
 
 [dependencies]
-serde_json = "1.0.17"
-failure = "0.1.1"
+serde_json = "1.0"
+failure = "0.1"
 
 [dependencies.todotxt]
 features = ["serde"]

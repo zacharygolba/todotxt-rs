@@ -1,7 +1,7 @@
 #![feature(test)]
 
 extern crate test;
-extern crate todotxt;
+
 
 use test::Bencher;
 use todotxt::prelude::*;

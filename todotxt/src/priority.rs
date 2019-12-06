@@ -1,5 +1,6 @@
-use nom::IResult;
-use parser::Parse;
+use crate::parser::Parse;
+#[cfg(feature = "serde")]
+use serde::Serialize;
 use std::{
     cmp::Ordering,
     fmt::{self, Display, Formatter},
@@ -34,7 +35,7 @@ pub enum Priority {
 }
 
 impl Display for Priority {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "({:?})", self)
     }
 }
@@ -42,7 +43,7 @@ impl Display for Priority {
 impl<'a> Parse<'a> for Priority {
     type Output = Priority;
 
-    fn parse(input: &str) -> IResult<&str, Self::Output> {
+    fn parse(input: &str) -> nom::IResult<&str, Self::Output> {
         named!(value<&str, Priority>,
             alt!(
                 value!(Priority::A, char!('A')) |

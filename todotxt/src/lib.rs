@@ -37,13 +37,6 @@
 
 #[macro_use]
 extern crate nom;
-#[cfg(feature = "rayon")]
-extern crate rayon;
-#[cfg(feature = "serde")]
-#[macro_use]
-extern crate serde;
-
-pub extern crate chrono;
 
 mod priority;
 mod tags;
@@ -61,10 +54,7 @@ pub mod prelude {
     //! use todotxt::prelude::*;
     //! ```
 
-    pub use parser::Input;
-    pub use priority::Priority;
-    pub use tags::Tag;
-    pub use task::Task;
+    pub use crate::{parser::Input, priority::Priority, tags::Tag, task::Task};
 }
 
 #[cfg(feature = "rayon")]
@@ -77,14 +67,18 @@ pub mod prelude {
     //! use todotxt::prelude::*;
     //! ```
 
+    pub use crate::{
+        parser::{Input, ParallelInput},
+        priority::Priority,
+        tags::Tag,
+        task::Task,
+    };
     pub use rayon::iter::ParallelIterator;
-
-    pub use parser::{Input, ParallelInput};
-    pub use priority::Priority;
-    pub use tags::Tag;
-    pub use task::Task;
 }
 
-pub use priority::Priority;
-pub use tags::{Tag, Tags};
-pub use task::{State, Task};
+pub use crate::{
+    priority::Priority,
+    tags::{Tag, Tags},
+    task::{State, Task},
+};
+pub use chrono;
