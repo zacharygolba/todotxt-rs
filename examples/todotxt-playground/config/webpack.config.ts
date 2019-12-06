@@ -34,6 +34,7 @@ export default function createConfig(mode = Environment.Development): Configurat
       minimizer: [new TerserWebpackPlugin()],
     },
     output: {
+      filename: "[name].[hash].js",
       path: path.resolve(packageRoot, "build"),
     },
     plugins: [
